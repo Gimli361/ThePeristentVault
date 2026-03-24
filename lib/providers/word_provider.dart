@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../db/database_helper.dart';
 import '../models/word.dart';
 import '../services/dictionary_service.dart';
@@ -10,6 +11,7 @@ class WordProvider extends ChangeNotifier {
   List<String> _allTags = [];
   String? _selectedTag;
   bool _isLoading = false;
+  Map<MasteryLevel, int> _masteryStats = {};
   final DictionaryService _dictionaryService = DictionaryService();
 
   List<Word> get words => _selectedTag != null ? _filteredWords : _words;
@@ -18,6 +20,7 @@ class WordProvider extends ChangeNotifier {
   String? get selectedTag => _selectedTag;
   bool get isLoading => _isLoading;
   int get wordCount => _words.length;
+  Map<MasteryLevel, int> get masteryStats => _masteryStats;
 
   Future<void> loadWords() async {
     _isLoading = true;
@@ -25,7 +28,8 @@ class WordProvider extends ChangeNotifier {
 
     _words = await DatabaseHelper.instance.getAllWords();
     _allTags = await DatabaseHelper.instance.getAllTags();
-    _randomWord = await DatabaseHelper.instance.getRandomWord();
+    _randomWord = await DatabaseHelper.instance.getWeightedRandomWord();
+    _masteryStats = await DatabaseHelper.instance.getMasteryStats();
 
     if (_selectedTag != null) {
       _filteredWords =
@@ -56,6 +60,10 @@ class WordProvider extends ChangeNotifier {
     }
 
     await DatabaseHelper.instance.insertWord(wordToSave);
+
+    // Haptic feedback on save
+    HapticFeedback.lightImpact();
+
     await loadWords();
   }
 
@@ -66,6 +74,19 @@ class WordProvider extends ChangeNotifier {
 
   Future<void> deleteWord(int id) async {
     await DatabaseHelper.instance.deleteWord(id);
+    await loadWords();
+  }
+
+  /// Promote a word's mastery level (Seed → Sprout → Oak)
+  Future<void> promoteWord(int wordId) async {
+    final word = _words.firstWhere((w) => w.id == wordId);
+    if (word.masteryLevel == MasteryLevel.oak) return;
+
+    final nextLevel = MasteryLevel.fromValue(word.masteryLevel.value + 1);
+    await DatabaseHelper.instance.updateMasteryLevel(wordId, nextLevel.value);
+
+    HapticFeedback.mediumImpact();
+
     await loadWords();
   }
 
@@ -83,7 +104,7 @@ class WordProvider extends ChangeNotifier {
   }
 
   Future<void> refreshRandomWord() async {
-    _randomWord = await DatabaseHelper.instance.getRandomWord();
+    _randomWord = await DatabaseHelper.instance.getWeightedRandomWord();
     notifyListeners();
   }
 

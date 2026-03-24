@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -42,6 +43,7 @@ class _WarehouseScreenState extends State<WarehouseScreen> {
 
   Future<void> _playAudio(String url) async {
     try {
+      HapticFeedback.lightImpact();
       await _audioPlayer.play(UrlSource(url));
     } catch (e) {
       if (mounted) {
@@ -345,6 +347,23 @@ class _WordCard extends StatelessWidget {
                   color: isDark ? Colors.grey[300] : Colors.grey[700],
                 ),
               ),
+              // Mastery badge
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _masteryColor(word.masteryLevel).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${word.masteryLevel.emoji} ${word.masteryLevel.label}',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _masteryColor(word.masteryLevel),
+                  ),
+                ),
+              ),
               if (word.exampleSentence != null &&
                   word.exampleSentence!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -412,5 +431,16 @@ class _WordCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _masteryColor(MasteryLevel level) {
+    switch (level) {
+      case MasteryLevel.seed:
+        return AppTheme.warningAmber;
+      case MasteryLevel.sprout:
+        return AppTheme.accent;
+      case MasteryLevel.oak:
+        return AppTheme.successGreen;
+    }
   }
 }

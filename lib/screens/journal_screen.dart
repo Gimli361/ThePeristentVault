@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../providers/journal_provider.dart';
 import '../providers/word_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/streak_provider.dart';
 import '../models/journal_entry.dart';
 import '../theme/app_theme.dart';
 
@@ -433,6 +435,13 @@ class _JournalEditorScreenState extends State<_JournalEditorScreen> {
     );
 
     await context.read<JournalProvider>().saveEntry(entry);
+
+    // Record streak activity
+    if (mounted) {
+      context.read<StreakProvider>().recordActivity();
+    }
+
+    HapticFeedback.mediumImpact();
 
     setState(() => _isSaving = false);
 

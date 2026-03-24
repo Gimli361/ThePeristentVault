@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'providers/word_provider.dart';
 import 'providers/journal_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/streak_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/warehouse_screen.dart';
@@ -11,9 +12,11 @@ import 'screens/journal_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/add_word_screen.dart';
 import 'utils/export_utils.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.initialize();
   runApp(const PersistentVaultApp());
 }
 
@@ -27,6 +30,7 @@ class PersistentVaultApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => WordProvider()..loadWords()),
         ChangeNotifierProvider(create: (_) => JournalProvider()..loadEntries()),
+        ChangeNotifierProvider(create: (_) => StreakProvider()..loadStreak()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
@@ -166,6 +170,27 @@ class _MainShellState extends State<MainShell> {
                 trailing: Switch(
                   value: isDark,
                   onChanged: (_) => context.read<ThemeProvider>().toggleTheme(),
+                  activeTrackColor: AppTheme.accent,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications_outlined),
+                title: Text('Notifications',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                trailing: Switch(
+                  value: true,
+                  onChanged: (val) async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    await NotificationService.instance.setEnabled(val);
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(val
+                            ? 'Notifications enabled'
+                            : 'Notifications disabled'),
+                        backgroundColor: AppTheme.accent,
+                      ),
+                    );
+                  },
                   activeTrackColor: AppTheme.accent,
                 ),
               ),

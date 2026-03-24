@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/word_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/streak_provider.dart';
 import '../models/word.dart';
 import '../services/dictionary_service.dart';
 import '../theme/app_theme.dart';
@@ -86,6 +88,13 @@ class _AddWordScreenState extends State<AddWordScreen> {
     );
 
     await context.read<WordProvider>().addWord(word, autoEnrich: !_enriched);
+
+    // Record streak activity
+    if (mounted) {
+      context.read<StreakProvider>().recordActivity();
+    }
+
+    HapticFeedback.mediumImpact();
 
     setState(() => _isSaving = false);
 
