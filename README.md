@@ -15,6 +15,12 @@ A minimalist, premium **personal English diary & word warehouse** built with Flu
 - Filter by tags (#Business, #Daily, #Academic...)
 - Swipe to delete
 
+### 🌱🌿🌳 Spaced Repetition (SRS)
+- **3-tier mastery system**: Seed → Sprout → Oak
+- Flash-Flip card **prioritizes unlearned words** (75% weight on Seed/Sprout)
+- Tap **"Knew it!"** to promote a word's mastery level
+- Mastery badges displayed on every word card
+
 ### 📓 English Journal
 - Write 3–5 sentences about your day in English
 - Words from your warehouse are **automatically highlighted** as you type
@@ -22,10 +28,21 @@ A minimalist, premium **personal English diary & word warehouse** built with Flu
 - Character count to encourage writing
 - **Calendar archive** to revisit past entries
 
+### 🔥 Streak System (Persistence Engine)
+- Dynamic **flame icon** on the home screen tracks your daily streak
+- Golden glow when active, grey when inactive
+- Streak resets if you miss a 24-hour window
+- 🎊 **Confetti celebration** at milestones: 7, 30, 100, 365 days
+
+### 🔔 Smart Notifications
+- ☀️ **Morning Challenge** (09:00) — A word to start your day
+- 🌙 **Evening Reflection** (21:00) — Reminder to write your journal
+- Toggleable from the settings drawer
+
 ### 🏠 Flash-Flip Card
-- A random "Word of the Day" on the home screen with a **3D flip animation**
+- **SRS-weighted "Word of the Day"** with a **3D flip animation**
 - Tap to reveal meaning, synonyms, and example sentence
-- Shuffle for a new word anytime
+- "Knew it" / "Didn't know" buttons for mastery progression
 
 ### 🔍 Global Search
 - Search across **all words and journal entries** simultaneously
@@ -41,6 +58,10 @@ A minimalist, premium **personal English diary & word warehouse** built with Flu
 - Light: Paper White `#F5F5F7` with subtle shadows
 - Persisted between sessions
 
+### 📳 Haptic Feedback
+- Tactile feedback on word save, audio playback, and form submission
+- Premium feel on every interaction
+
 ---
 
 ## 🛠 Tech Stack
@@ -55,6 +76,9 @@ A minimalist, premium **personal English diary & word warehouse** built with Flu
 | Fonts | Google Fonts (Playfair Display + Inter) |
 | Export | csv + pdf + printing |
 | Calendar | table_calendar |
+| Notifications | flutter_local_notifications + timezone |
+| Animations | confetti |
+| Haptics | vibration |
 
 ---
 
@@ -64,21 +88,23 @@ A minimalist, premium **personal English diary & word warehouse** built with Flu
 lib/
 ├── main.dart                        # Entry point, providers, navigation shell
 ├── db/
-│   └── database_helper.dart         # SQLite CRUD for words & journal
+│   └── database_helper.dart         # SQLite CRUD + DB migration (v2)
 ├── models/
-│   ├── word.dart
+│   ├── word.dart                    # Word model + MasteryLevel enum
 │   └── journal_entry.dart
 ├── services/
-│   └── dictionary_service.dart      # Free Dictionary API client
+│   ├── dictionary_service.dart      # Free Dictionary API client
+│   └── notification_service.dart    # Morning/evening smart reminders
 ├── providers/
-│   ├── word_provider.dart
+│   ├── word_provider.dart           # SRS mastery + weighted Flash-Flip
 │   ├── journal_provider.dart
-│   └── theme_provider.dart
+│   ├── theme_provider.dart
+│   └── streak_provider.dart         # Streak tracking + milestones
 ├── theme/
 │   └── app_theme.dart               # Dark & light theme definitions
 ├── screens/
-│   ├── home_screen.dart             # Flash-flip card, stats, quick actions
-│   ├── warehouse_screen.dart        # Word list, search, tags, audio
+│   ├── home_screen.dart             # Flame, mastery bar, confetti, flip card
+│   ├── warehouse_screen.dart        # Word list, search, tags, mastery badges
 │   ├── add_word_screen.dart         # Add word form + API enrichment
 │   ├── journal_screen.dart          # Editor + calendar archive
 │   └── search_screen.dart           # Global search
